@@ -1,5 +1,6 @@
 colors = require 'colors'
 intdoc = require 'intdoc'
+objects = require 'lodash-node/modern/objects'
 vm = require 'vm'
 
 __doc__ = """Shows documentation for an expression; you can also type Ctrl-Q in-line"""
@@ -49,9 +50,17 @@ exports.postStart = (context) ->
         repl.displayPrompt()
         return null
 
-      #repl.outputStream.write "#{ colors.cyan result }\n"
+      if result.that? and objects.isFunction result
+        # This is a synchronized version of a fibrous function
+        # so we look to the original one instead
+        result = result.that
+        defibbed = true
+      else
+        defibbed = false
 
       doc = intdoc result
+      if defibbed
+        callbackParam = doc.params.pop()
       if doc.name and doc.name.length > 0
         tyname = "[#{ doc.type }: #{ doc.name }]"
       else
@@ -59,6 +68,8 @@ exports.postStart = (context) ->
       repl.outputStream.write colors.cyan tyname
       if typeof result is 'function' and doc.params?
         repl.outputStream.write colors.yellow " #{ doc.name }(#{ ("#{ x }" for x in doc.params).join ", "})"
+        if defibbed
+          repl.outputStream.write colors.yellow " *#{ callbackParam } handled by fibrous"
       repl.outputStream.write "\n"
       if doc.doc? and doc.doc.length > 0
         repl.outputStream.write doc.doc + "\n"
