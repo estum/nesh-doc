@@ -1,0 +1,33 @@
+{
+  "name": "nesh-doc",
+  "version": "0.0.1",
+  "description": "Interactive documentation for nesh",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ccheever/nesh-doc.git"
+  },
+  "keywords": [
+    "nesh",
+    "plugin",
+    "intdoc",
+    "documentation",
+    "shell",
+    "repl",
+    "doc",
+    "docs"
+  ],
+  "author": "Charlie Cheever <ccheever@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ccheever/nesh-doc/issues"
+  },
+  "homepage": "https://github.com/ccheever/nesh-doc",
+  "dependencies": {
+    "intdoc": "~0.1.2",
+    "colors": "~0.6.2"
+  }
+}
