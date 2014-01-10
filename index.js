@@ -37,7 +37,9 @@
     document = function(expr, reportErrors) {
       var doc, e, result, tyname, x;
       if (expr.trim().length === 0) {
-        repl.outputStream.write(colors.cyan("" + __doc__ + "\n"));
+        if (reportErrors) {
+          repl.outputStream.write(colors.cyan("" + __doc__ + "\n"));
+        }
       } else {
         try {
           if (repl.useGlobal) {

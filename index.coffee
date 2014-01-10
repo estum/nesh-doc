@@ -35,7 +35,8 @@ exports.postStart = (context) ->
 
   document = (expr, reportErrors) -> 
     if expr.trim().length == 0
-      repl.outputStream.write colors.cyan "#{ __doc__ }\n"
+      if reportErrors
+        repl.outputStream.write colors.cyan "#{ __doc__ }\n"
     else
       try 
         if repl.useGlobal
