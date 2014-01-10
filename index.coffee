@@ -33,7 +33,7 @@ lastTokenPlus = (input) ->
 exports.postStart = (context) ->
   {repl} = context
 
-  document = (expr, reportErrors) -> 
+  document = (expr, reportErrors, showCode) -> 
     if expr.trim().length == 0
       if reportErrors
         repl.outputStream.write colors.cyan "#{ __doc__ }\n"
@@ -63,8 +63,15 @@ exports.postStart = (context) ->
       if doc.doc? and doc.doc.length > 0
         repl.outputStream.write doc.doc + "\n"
 
-      #repl.outputStream.write colors.green result.toString() + "\n"
+    if showCode
+      if doc.code?
+        repl.outputStream.write colors.green doc.code + "\n"
+      else
+        repl.outputStream.write colors.green result.toString() + "\n"
     repl.displayPrompt()
+
+    # Return the documentation
+    doc
 
 
   repl.defineCommand 'doc',
@@ -75,23 +82,32 @@ exports.postStart = (context) ->
   # Add a handler for Ctrl-Q that does documentation for
   # the most recent thing you typed
   repl.inputStream.on 'keypress', (char, key) ->
-    return unless key and key.ctrl and not key.meta and not key.shift and key.name is 'q'
+    leave = true unless key and key.ctrl and not key.meta and not key.shift and key.name is 'q'
+    if leave
+      repl.__neshDoc__lastDoc = null
+      return 
     rli = repl.rli
-    repl.docRequested = true
+    repl.__neshDoc__docRequested = true
     rli.write "\n"
 
   originalEval = repl.eval
   repl.eval = (input, context, filename, callback) ->
-    if repl.docRequested
-      repl.docRequested = false
+    if repl.__neshDoc__docRequested
+      repl.__neshDoc__docRequested = false
       #console.log colors.green "'#{ input }'"
       input = input[1..-3]
       toDoc = lastTokenPlus input
       if toDoc != input
         repl.outputStream.write colors.yellow toDoc + "\n"
-      document toDoc
+      if repl.__neshDoc__lastDoc == toDoc
+        showCode = true
+      else
+        showCode = false
+      doc = document toDoc, false, showCode
+      repl.__neshDoc__lastDoc = toDoc
       repl.rli.write input
     else
+      repl.__neshDoc__lastDoc = null
       originalEval input, context, filename, callback
 
 #module.exports.lastTokenPlus = lastTokenPlus

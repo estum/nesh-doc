@@ -34,7 +34,7 @@
   exports.postStart = function(context) {
     var document, originalEval, repl;
     repl = context.repl;
-    document = function(expr, reportErrors) {
+    document = function(expr, reportErrors, showCode) {
       var doc, e, result, tyname, x;
       if (expr.trim().length === 0) {
         if (reportErrors) {
@@ -79,7 +79,15 @@
           repl.outputStream.write(doc.doc + "\n");
         }
       }
-      return repl.displayPrompt();
+      if (showCode) {
+        if (doc.code != null) {
+          repl.outputStream.write(colors.green(doc.code + "\n"));
+        } else {
+          repl.outputStream.write(colors.green(result.toString() + "\n"));
+        }
+      }
+      repl.displayPrompt();
+      return doc;
     };
     repl.defineCommand('doc', {
       help: __doc__,
@@ -88,27 +96,38 @@
       }
     });
     repl.inputStream.on('keypress', function(char, key) {
-      var rli;
+      var leave, rli;
       if (!(key && key.ctrl && !key.meta && !key.shift && key.name === 'q')) {
+        leave = true;
+      }
+      if (leave) {
+        repl.__neshDoc__lastDoc = null;
         return;
       }
       rli = repl.rli;
-      repl.docRequested = true;
+      repl.__neshDoc__docRequested = true;
       return rli.write("\n");
     });
     originalEval = repl["eval"];
     return repl["eval"] = function(input, context, filename, callback) {
-      var toDoc;
-      if (repl.docRequested) {
-        repl.docRequested = false;
+      var doc, showCode, toDoc;
+      if (repl.__neshDoc__docRequested) {
+        repl.__neshDoc__docRequested = false;
         input = input.slice(1, -2);
         toDoc = lastTokenPlus(input);
         if (toDoc !== input) {
           repl.outputStream.write(colors.yellow(toDoc + "\n"));
         }
-        document(toDoc);
+        if (repl.__neshDoc__lastDoc === toDoc) {
+          showCode = true;
+        } else {
+          showCode = false;
+        }
+        doc = document(toDoc, false, showCode);
+        repl.__neshDoc__lastDoc = toDoc;
         return repl.rli.write(input);
       } else {
+        repl.__neshDoc__lastDoc = null;
         return originalEval(input, context, filename, callback);
       }
     };
