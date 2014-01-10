@@ -29,5 +29,8 @@
   "dependencies": {
     "intdoc": "~0.1.2",
     "colors": "~0.6.2"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.6.3"
   }
 }
