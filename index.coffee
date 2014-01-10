@@ -25,7 +25,7 @@ lastTokenPlus = (input) ->
   # Trim the string down if there are dots on either end
   if t[0] is "."
     t = t[1..]
-  if t[..-2] is "."
+  if t[-1..] is "."
     t = t[..-2]
 
   t
@@ -75,10 +75,11 @@ exports.postStart = (context) ->
         repl.outputStream.write doc.doc + "\n"
 
     if showCode
-      if doc.code?
-        repl.outputStream.write colors.green doc.code + "\n"
-      else
-        repl.outputStream.write colors.green result.toString() + "\n"
+      if doc
+        if doc.code?
+          repl.outputStream.write colors.green doc.code + "\n"
+        else
+          repl.outputStream.write colors.green result.toString() + "\n"
     repl.displayPrompt()
 
     # Return the documentation

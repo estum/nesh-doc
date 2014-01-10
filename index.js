@@ -27,7 +27,7 @@
     if (t[0] === ".") {
       t = t.slice(1);
     }
-    if (t.slice(0, -1) === ".") {
+    if (t.slice(-1) === ".") {
       t = t.slice(0, -1);
     }
     return t;
@@ -94,10 +94,12 @@
         }
       }
       if (showCode) {
-        if (doc.code != null) {
-          repl.outputStream.write(colors.green(doc.code + "\n"));
-        } else {
-          repl.outputStream.write(colors.green(result.toString() + "\n"));
+        if (doc) {
+          if (doc.code != null) {
+            repl.outputStream.write(colors.green(doc.code + "\n"));
+          } else {
+            repl.outputStream.write(colors.green(result.toString() + "\n"));
+          }
         }
       }
       repl.displayPrompt();
