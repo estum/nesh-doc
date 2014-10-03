@@ -1,6 +1,6 @@
 {
   "name": "nesh-doc",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Interactive documentation for nesh",
   "main": "index.js",
   "scripts": {
@@ -27,8 +27,8 @@
   },
   "homepage": "https://github.com/ccheever/nesh-doc",
   "dependencies": {
+    "chalk": "^0.5.1",
     "intdoc": "~0.1.2",
-    "colors": "~0.6.2",
     "lodash-node": "~2.4.1"
   },
   "devDependencies": {
