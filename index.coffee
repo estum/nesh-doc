@@ -1,9 +1,9 @@
+__doc__ = """Shows documentation for an expression; you can also type Ctrl-Q in-line"""
+
 chalk = require 'chalk'
 intdoc = require 'intdoc'
-objects = require 'lodash-node/modern/objects'
+{ isFunction } = require 'lodash-node'
 vm = require 'vm'
-
-__doc__ = """Shows documentation for an expression; you can also type Ctrl-Q in-line"""
 
 lastTokenPlus = (input) ->
   """A crude cut at figuring out where the last thing you want to
@@ -30,6 +30,7 @@ lastTokenPlus = (input) ->
 
   t
 
+exports.__doc__ = __doc__
 
 exports.postStart = (context) ->
   {repl} = context
@@ -50,7 +51,7 @@ exports.postStart = (context) ->
         repl.displayPrompt()
         return null
 
-      if result.that? and objects.isFunction result
+      if result.that? and isFunction result
         # This is a synchronized version of a fibrous function
         # so we look to the original one instead
         result = result.that
@@ -121,5 +122,3 @@ exports.postStart = (context) ->
     else
       repl.__neshDoc__lastDoc = null
       originalEval input, context, filename, callback
-
-#module.exports.lastTokenPlus = lastTokenPlus
