@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ccheever/nesh-doc",
   "dependencies": {
     "crayon-terminal": "^3.0.0",
-    "intdoc": "^0.2.0",
+    "intdoc": "^1.0.0",
     "lodash-node": "^3.1.0"
   },
   "devDependencies": {

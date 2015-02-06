@@ -54,7 +54,7 @@
       }
     };
     document = function(expr, reportErrors, showCode) {
-      var callbackParam, defibbed, doc, e, result, tyname, x, _ref;
+      var callbackParam, defibbed, doc, e, result, tyname, x, _ref, _ref1;
       if (expr.trim().length === 0) {
         if (reportErrors) {
           repl.outputStream.write(crayon.cyan(__doc__ + "\n"));
@@ -92,12 +92,12 @@
         }
         repl.outputStream.write(crayon.cyan(tyname));
         if (typeof result === 'function' && (doc.params != null)) {
-          repl.outputStream.write(crayon.yellow(" " + ((_ref = doc.name) != null ? _ref : crayon.gray('<Lambda>')) + "(" + (((function() {
-            var _i, _len, _ref1, _results;
-            _ref1 = doc.params;
+          repl.outputStream.write(crayon.yellow(" " + ((_ref = doc.name) != null ? _ref : crayon.gray((_ref1 = result != null ? result.name : void 0) != null ? _ref1 : '<Lambda>')) + "(" + (((function() {
+            var _i, _len, _ref2, _results;
+            _ref2 = doc.params;
             _results = [];
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              x = _ref1[_i];
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              x = _ref2[_i];
               _results.push("" + x);
             }
             return _results;

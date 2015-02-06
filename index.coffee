@@ -80,7 +80,7 @@ exports.postStart = (context) ->
         tyname = "[#{ doc.type }]"
       repl.outputStream.write crayon.cyan tyname
       if typeof result is 'function' and doc.params?
-        repl.outputStream.write crayon.yellow " #{ doc.name ? crayon.gray '<Lambda>' }(#{ ("#{ x }" for x in doc.params).join ", "})"
+        repl.outputStream.write crayon.yellow " #{ doc.name ? crayon.gray(result?.name ? '<Lambda>') }(#{ ("#{ x }" for x in doc.params).join ", "})"
         if defibbed
           repl.outputStream.write crayon.yellow " *#{ callbackParam } handled by fibrous"
       repl.outputStream.write "\n"
