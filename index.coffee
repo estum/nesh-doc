@@ -1,6 +1,6 @@
 __doc__ = """Shows documentation for an expression; you can also type Ctrl-Q in-line"""
 
-chalk = require 'chalk'
+crayon = require 'crayon-terminal'
 intdoc = require 'intdoc'
 { isFunction } = require 'lodash-node'
 vm = require 'vm'
@@ -17,29 +17,41 @@ lastTokenPlus = (input) ->
     """
 
   t = ""
-  for c in input by -1
-    if c not in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.[]'\"$_:"
-      break
-    t = c + t
+  if input?
+    for c in input by -1
+      if c not in "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.[]'\"$_:"
+        break
+      t = c + t
 
-  # Trim the string down if there are dots on either end
-  if t[0] is "."
-    t = t[1..]
-  if t[-1..] is "."
-    t = t[..-2]
+    # Trim the string down if there are dots on either end
+    if t[0] is "."
+      t = t[1..]
+    if t[-1..] is "."
+      t = t[..-2]
 
   t
 
 exports.__doc__ = __doc__
 
 exports.postStart = (context) ->
-  {repl} = context
+  { repl } = context
+
+  _eval = (expr) ->
+    try
+      if repl.useGlobal
+        vm.runInThisContext "(#{ expr })"
+      else
+        vm.runInContext "(#{ expr })", repl.context
+    catch e
+      return undefined
+
 
   document = (expr, reportErrors, showCode) ->
     if expr.trim().length == 0
       if reportErrors
-        repl.outputStream.write chalk.cyan "#{ __doc__ }\n"
+        repl.outputStream.write crayon.cyan "#{ __doc__ }\n"
     else
+      repl.outputStream.write crayon.yellow "#{ expr }\n"
       try
         if repl.useGlobal
           result = vm.runInThisContext "(#{ expr })"
@@ -47,11 +59,11 @@ exports.postStart = (context) ->
           result = vm.runInContext "(#{ expr })", repl.context
       catch e
         if reportErrors
-          repl.outputStream.write chalk.red "Bad input; can't document\n"
+          repl.outputStream.write crayon.red "Bad input; can't document\n"
         repl.displayPrompt()
         return null
 
-      if result.that? and isFunction result
+      if result?.that? and isFunction result
         # This is a synchronized version of a fibrous function
         # so we look to the original one instead
         result = result.that
@@ -66,11 +78,11 @@ exports.postStart = (context) ->
         tyname = "[#{ doc.type }: #{ doc.name }]"
       else
         tyname = "[#{ doc.type }]"
-      repl.outputStream.write chalk.cyan tyname
+      repl.outputStream.write crayon.cyan tyname
       if typeof result is 'function' and doc.params?
-        repl.outputStream.write chalk.yellow " #{ doc.name ? chalk.gray '<Lambda>' }(#{ ("#{ x }" for x in doc.params).join ", "})"
+        repl.outputStream.write crayon.yellow " #{ doc.name ? crayon.gray '<Lambda>' }(#{ ("#{ x }" for x in doc.params).join ", "})"
         if defibbed
-          repl.outputStream.write chalk.yellow " *#{ callbackParam } handled by fibrous"
+          repl.outputStream.write crayon.yellow " *#{ callbackParam } handled by fibrous"
       repl.outputStream.write "\n"
       if doc.doc? and doc.doc.length > 0
         repl.outputStream.write doc.doc + "\n"
@@ -78,9 +90,10 @@ exports.postStart = (context) ->
     if showCode
       if doc
         if doc.code?
-          repl.outputStream.write chalk.green doc.code + "\n"
+          repl.outputStream.write crayon.green doc.code + "\n"
         else
-          repl.outputStream.write chalk.green result.toString() + "\n"
+          repl.outputStream.write crayon.green "#{ result }\n"
+
     repl.displayPrompt()
 
     # Return the documentation
@@ -94,31 +107,19 @@ exports.postStart = (context) ->
 
   # Add a handler for Ctrl-Q that does documentation for
   # the most recent thing you typed
+  __lastKeypressWasCtrlQ = false
   repl.inputStream.on 'keypress', (char, key) ->
     leave = true unless key and key.ctrl and not key.meta and not key.shift and key.name is 'q'
     if leave
-      repl.__neshDoc__lastDoc = null
-      return
-    rli = repl.rli
-    repl.__neshDoc__docRequested = true
-    rli.write "\n"
-
-  originalEval = repl.eval
-  repl.eval = (input, context, filename, callback) ->
-    if repl.__neshDoc__docRequested
-      repl.__neshDoc__docRequested = false
-      #console.log chalk.green "'#{ input }'"
-      input = input[1..-3]
-      toDoc = lastTokenPlus input
-      if toDoc != input
-        repl.outputStream.write chalk.yellow toDoc + "\n"
-      if repl.__neshDoc__lastDoc == toDoc
-        showCode = true
-      else
-        showCode = false
-      doc = document toDoc, false, showCode
-      repl.__neshDoc__lastDoc = toDoc
-      repl.rli.write input
+      __lastKeypressWasCtrlQ = false
     else
-      repl.__neshDoc__lastDoc = null
-      originalEval input, context, filename, callback
+      rli = repl.rli
+      cp = rli.cursor
+      origPrompt = repl._prompt ? repl.prompt
+      input = rli.line
+      rli.output.write "\n"
+      toDoc = lastTokenPlus input
+      document toDoc, false, __lastKeypressWasCtrlQ
+      rli.line = ""
+      rli.write input
+      __lastKeypressWasCtrlQ = true
