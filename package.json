@@ -1,6 +1,6 @@
 {
   "name": "nesh-doc",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Interactive documentation for nesh",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ccheever/nesh-doc",
   "dependencies": {
     "crayon-terminal": "^3.0.0",
-    "intdoc": "^1.1.0",
+    "intdoc": "^1.2.0",
     "lodash-node": "^3.1.0"
   },
   "devDependencies": {

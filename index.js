@@ -54,7 +54,7 @@
       }
     };
     document = function(expr, reportErrors, showCode) {
-      var callbackParam, defibbed, doc, e, result, tyname, x, _ref, _ref1;
+      var callbackParam, decallbacked, doc, e, handler, result, tyname, x, _ref, _ref1;
       if (expr.trim().length === 0) {
         if (reportErrors) {
           repl.outputStream.write(crayon.cyan(__doc__ + "\n"));
@@ -75,14 +75,9 @@
           repl.displayPrompt();
           return null;
         }
-        if (((result != null ? result.that : void 0) != null) && isFunction(result)) {
-          result = result.that;
-          defibbed = true;
-        } else {
-          defibbed = false;
-        }
         doc = intdoc(result);
-        if (defibbed) {
+        decallbacked = doc.isFibrous || doc.isInstapromise;
+        if (decallbacked) {
           callbackParam = doc.params.pop();
         }
         if (doc.name && doc.name.length > 0) {
@@ -102,8 +97,15 @@
             }
             return _results;
           })()).join(", ")) + ")"));
-          if (defibbed) {
-            repl.outputStream.write(crayon.yellow(" *" + callbackParam + " handled by fibrous"));
+          if (decallbacked) {
+            if (doc.isFibrous) {
+              handler = " by fibrous";
+            } else if (doc.isInstapromise) {
+              handler = " by instapromise";
+            } else {
+              handler = "";
+            }
+            repl.outputStream.write(crayon.yellow(" *" + callbackParam + " handled" + handler));
           }
         }
         repl.outputStream.write("\n");

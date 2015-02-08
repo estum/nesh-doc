@@ -63,16 +63,10 @@ exports.postStart = (context) ->
         repl.displayPrompt()
         return null
 
-      if result?.that? and isFunction result
-        # This is a synchronized version of a fibrous function
-        # so we look to the original one instead
-        result = result.that
-        defibbed = true
-      else
-        defibbed = false
-
       doc = intdoc result
-      if defibbed
+      decallbacked = doc.isFibrous or doc.isInstapromise
+
+      if decallbacked
         callbackParam = doc.params.pop()
       if doc.name and doc.name.length > 0
         tyname = "[#{ doc.type }: #{ doc.name }]"
@@ -81,8 +75,14 @@ exports.postStart = (context) ->
       repl.outputStream.write crayon.cyan tyname
       if typeof result is 'function' and doc.params?
         repl.outputStream.write crayon.yellow " #{ doc.name ? crayon.gray(result?.name ? '<Lambda>') }(#{ ("#{ x }" for x in doc.params).join ", "})"
-        if defibbed
-          repl.outputStream.write crayon.yellow " *#{ callbackParam } handled by fibrous"
+        if decallbacked
+          if doc.isFibrous
+            handler = " by fibrous"
+          else if doc.isInstapromise
+            handler = " by instapromise"
+          else
+            handler = ""
+          repl.outputStream.write crayon.yellow " *#{ callbackParam } handled#{ handler }"
       repl.outputStream.write "\n"
       if doc.doc? and doc.doc.length > 0
         repl.outputStream.write doc.doc + "\n"
