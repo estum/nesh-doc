@@ -103,7 +103,7 @@ exports.postStart = (context) ->
   repl.defineCommand 'doc',
     help: __doc__
     action: (expr) ->
-      document expr, true
+      document expr, true, true
 
   # Add a handler for Ctrl-Q that does documentation for
   # the most recent thing you typed
