@@ -128,7 +128,7 @@
     repl.defineCommand('doc', {
       help: __doc__,
       action: function(expr) {
-        return document(expr, true);
+        return document(expr, true, true);
       }
     });
     __lastKeypressWasCtrlQ = false;
